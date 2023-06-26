@@ -60,4 +60,13 @@ class CriptoRepositorio
         }
     }
 
+    public static function ExisteMoneda(string $monedaNombre)
+    {
+        $sql = AccesoDatos::obtenerInstancia();
+        $query = $sql->prepararConsulta("SELECT * FROM CRIPTOMONEDAS WHERE NOMBRE = ?");
+        $query->bindParam(1, $monedaNombre);
+        $query->execute();
+        return $query->rowCount() > 0 ? true : false;
+    }
+
 }

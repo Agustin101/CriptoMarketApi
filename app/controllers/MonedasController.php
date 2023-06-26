@@ -26,6 +26,11 @@ class MonedasController
             return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
+        if (CriptoRepositorio::ExisteMoneda($moneda->nombre)) {
+            $res->getBody()->write(json_encode(array("mensaje" => "Ya existe una moneda con ese nombre.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
         try {
             CriptoRepositorio::AgregarMoneda($moneda);
             $this->GuardarFoto("C:\\xampp\htdocs\CriptoMarket\app\FotosMonedas", $imagen, $moneda->nombre);
@@ -94,7 +99,12 @@ class MonedasController
             return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
-        $res->getBody()->write(json_encode(array("Monedas" => $monedas)));
+        if ($monedas == false) {
+            $res->getBody()->write(json_encode(array("Monedas" => "No hay ninguna moneda registrada con ese ID.")));
+
+        } else {
+            $res->getBody()->write(json_encode(array("Monedas" => $monedas)));
+        }
         return $res
             ->withHeader('Content-Type', 'application/json')->withStatus(200);
     }

@@ -16,18 +16,23 @@ class VentasController
         date_default_timezone_set('America/Argentina/Buenos_Aires');
 
         $parametros = $req->getParsedBody();
-        $venta = new Venta();
-        $venta->cantidad = $parametros["cantidad"];
-        $venta->clienteId = $parametros["idCliente"];
-        $venta->criptoMonedaId = $parametros["idMoneda"];
         $archivos = $req->getUploadedFiles();
         $imagen = $archivos["foto"];
         $header = $req->getHeaderLine('Authorization');
         $token = trim(explode("Bearer", $header)[1]);
         $data = token::ObtenerData($token);
+        $venta = new Venta();
+        $venta->cantidad = $parametros["cantidad"];
+        $venta->criptoMonedaId = $parametros["idMoneda"];
+        $venta->clienteId = $data->id;
 
         if ($imagen->getError() !== UPLOAD_ERR_OK) {
             $res->getBody()->write(json_encode(array("mensaje" => "Hubo un error al obtener la imagen.")));
+            return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
+        }
+
+        if (CriptoRepositorio::ObtenerMonedaPorId($venta->criptoMonedaId) == false) {
+            $res->getBody()->write(json_encode(array("mensaje" => "El id no corresponde a ninguna criptomoneda registrada.")));
             return $res->withHeader('Content-Type', 'application/json')->withStatus(400);
         }
 
